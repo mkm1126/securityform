@@ -1,32 +1,34 @@
-# Use Node.js 18 Alpine as base image
-FROM node:18-alpine
+# --- Stage 1: Build the application ---
+FROM node:20-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Install dependencies based on lockfile for better cache
+COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
+RUN \
+  if [ -f package-lock.json ]; then npm ci; \
+  elif [ -f pnpm-lock.yaml ]; then npm install -g pnpm && pnpm install; \
+  elif [ -f yarn.lock ]; then yarn install; \
+  else npm install; fi
 
-# Install dependencies
-RUN npm ci --only=production
-
-# Copy source code
+# Copy source
 COPY . .
 
-# Build the application
+# Build the app for production
 RUN npm run build
 
-# Use nginx to serve the built application
-FROM nginx:alpine
+# --- Stage 2: Serve with Nginx ---
+FROM nginx:1.25-alpine
 
-# Copy built files from previous stage
-COPY --from=0 /app/dist /usr/share/nginx/html
+# Remove default nginx static files
+RUN rm -rf /usr/share/nginx/html/*
 
-# Copy nginx configuration
+# Copy built files from builder
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copy custom nginx config (see below)
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Expose port 80
-EXPOSE 80
+EXPOSE 8080
 
-# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
