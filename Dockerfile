@@ -2,10 +2,9 @@
 FROM node:20-alpine AS builder
 
 WORKDIR /app
-COPY .env ./
 
 # Install dependencies based on lockfile for better cache
-COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
+COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* .env ./ 
 RUN \
   if [ -f package-lock.json ]; then npm ci; \
   elif [ -f pnpm-lock.yaml ]; then npm install -g pnpm && pnpm install; \
