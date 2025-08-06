@@ -58,6 +58,7 @@ interface Approval {
   status: 'pending' | 'approved' | 'denied';
   signature_data: string | null;
   approved_at: string | null;
+  comments: string | null;
 }
 
 function RequestDetailsPage() {
@@ -153,7 +154,30 @@ function RequestDetailsPage() {
         .order('created_at', { ascending: true });
 
       if (approvalsError) throw approvalsError;
-      setApprovals(approvalsData || []);
+      
+      // Sort approvals to ensure Security Admin is always last
+      const sortedApprovals = (approvalsData || []).sort((a, b) => {
+        const stepOrder = {
+          'user_signature': 1,
+          'supervisor_approval': 2,
+          'accounting_director_approval': 3,
+          'hr_director_approval': 3,
+          'elm_admin_approval': 3,
+          'security_admin_approval': 4  // Always last
+        };
+        
+        const orderA = stepOrder[a.step as keyof typeof stepOrder] || 3;
+        const orderB = stepOrder[b.step as keyof typeof stepOrder] || 3;
+        
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+        
+        // If same order level, sort by created_at
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      });
+      
+      setApprovals(sortedApprovals);
 
     } catch (err) {
       console.error('Error fetching request details:', err);
@@ -690,6 +714,11 @@ function RequestDetailsPage() {
                         <p className="text-xs text-gray-500 mt-1">
                           {new Date(approval.approved_at).toLocaleString()}
                         </p>
+                      )}
+                      {approval.comments && (
+                        <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-700">
+                          <strong>Comments:</strong> {approval.comments}
+                        </div>
                       )}
                     </div>
                   </div>

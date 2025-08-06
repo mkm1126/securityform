@@ -13,6 +13,7 @@ import ElmRoleSelectionPage from './ElmRoleSelectionPage.tsx';
 import EpmDwhRoleSelectionPage from './EpmDwhRoleSelectionPage.tsx';
 import HrPayrollRoleSelectionPage from './HrPayrollRoleSelectionPage.tsx';
 import TestPage from './TestPage.tsx';
+import TestApprovalOrder from './TestApprovalOrder.tsx';
 import './index.css';
 
 // Comprehensive protection against browser extension errors
@@ -105,6 +106,7 @@ createRoot(document.getElementById('root')!).render(
       <Route path="/epm-dwh-roles" element={<EpmDwhRoleSelectionPage />} />
       <Route path="/hr-payroll-roles" element={<HrPayrollRoleSelectionPage />} />
       <Route path="/success" element={<SuccessPage />} />
+      <Route path="/test-approval-order" element={<TestApprovalOrder />} />
       <Route path="/select-roles" element={<SelectRolesPage />} />
       <Route path="/requests" element={<RequestListPage />} />
       <Route path="/requests/:id" element={<RequestDetailsPage />} />

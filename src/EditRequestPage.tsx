@@ -214,9 +214,6 @@ function EditRequestPage() {
 
       // Extract username from email addresses
       const extractUsername = (email: string) => {
-        if (email && email.includes('@state.mn.us')) {
-          return email.replace('@state.mn.us', '');
-        }
         return email;
       };
 
@@ -302,9 +299,9 @@ function EditRequestPage() {
           submitter_name: data.submitterName,
           submitter_email: data.submitterEmail,
           supervisor_name: data.supervisorName,
-          supervisor_email: `${data.supervisorUsername}@state.mn.us`,
+          supervisor_email: data.supervisorUsername,
           security_admin_name: data.securityAdminName,
-          security_admin_email: `${data.securityAdminUsername}@state.mn.us`,
+          security_admin_email: data.securityAdminUsername,
         })
         .eq('id', id);
 
@@ -317,7 +314,7 @@ function EditRequestPage() {
         securityAreas.push({
           area_type: 'accounting_procurement',
           director_name: data.accountingDirector,
-          director_email: `${data.accountingDirectorUsername}@state.mn.us`,
+          director_email: data.accountingDirectorUsername,
         });
       } else if (data.securityArea === 'hr_payroll') {
         securityAreas.push({
@@ -333,7 +330,7 @@ function EditRequestPage() {
         securityAreas.push({
           area_type: 'elm',
           director_name: data.elmKeyAdmin,
-          director_email: `${data.elmKeyAdminUsername}@state.mn.us`,
+          director_email: data.elmKeyAdminUsername,
         });
       }
 
@@ -717,23 +714,18 @@ function EditRequestPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Supervisor Username*</label>
-                  <div className="mt-1 flex rounded-md shadow-sm">
-                    <input
-                      type="text"
-                      {...register('supervisorUsername', {
-                        required: 'Supervisor username is required',
-                        pattern: {
-                          value: /^[a-zA-Z0-9._-]+$/,
-                          message: 'Username can only contain letters, numbers, dots, hyphens, and underscores'
-                        }
-                      })}
-                      className="flex-1 rounded-l-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                      placeholder="username"
-                    />
-                    <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                      @state.mn.us
-                    </span>
-                  </div>
+                  <input
+                    type="email"
+                    {...register('supervisorUsername', {
+                      required: 'Supervisor email is required',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: 'Please enter a valid email address'
+                      }
+                    })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="supervisor@example.com"
+                  />
                   {errors.supervisorUsername && (
                     <p className="mt-1 text-sm text-red-600">{errors.supervisorUsername.message}</p>
                   )}
@@ -753,23 +745,18 @@ function EditRequestPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Security Administrator Username*</label>
-                  <div className="mt-1 flex rounded-md shadow-sm">
-                    <input
-                      type="text"
-                      {...register('securityAdminUsername', {
-                        required: 'Security admin username is required',
-                        pattern: {
-                          value: /^[a-zA-Z0-9._-]+$/,
-                          message: 'Username can only contain letters, numbers, dots, hyphens, and underscores'
-                        }
-                      })}
-                      className="flex-1 rounded-l-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                      placeholder="username"
-                    />
-                    <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                      @state.mn.us
-                    </span>
-                  </div>
+                  <input
+                    type="email"
+                    {...register('securityAdminUsername', {
+                      required: 'Security admin email is required',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: 'Please enter a valid email address'
+                      }
+                    })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="admin@example.com"
+                  />
                   {errors.securityAdminUsername && (
                     <p className="mt-1 text-sm text-red-600">{errors.securityAdminUsername.message}</p>
                   )}
@@ -831,23 +818,18 @@ function EditRequestPage() {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Director Username*</label>
-                        <div className="mt-1 flex rounded-md shadow-sm">
-                          <input
-                            type="text"
-                            {...register('accountingDirectorUsername', {
-                              required: 'Director username is required',
-                              pattern: {
-                                value: /^[a-zA-Z0-9._-]+$/,
-                                message: 'Username can only contain letters, numbers, dots, hyphens, and underscores'
-                              }
-                            })}
-                            className="flex-1 rounded-l-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                            placeholder="username"
-                          />
-                          <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                            @state.mn.us
-                          </span>
-                        </div>
+                        <input
+                          type="email"
+                          {...register('accountingDirectorUsername', {
+                            required: 'Director email is required',
+                            pattern: {
+                              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                              message: 'Please enter a valid email address'
+                            }
+                          })}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          placeholder="director@example.com"
+                        />
                         {errors.accountingDirectorUsername && (
                           <p className="mt-1 text-sm text-red-600">{errors.accountingDirectorUsername.message}</p>
                         )}
@@ -960,23 +942,18 @@ function EditRequestPage() {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Administrator Username*</label>
-                        <div className="mt-1 flex rounded-md shadow-sm">
-                          <input
-                            type="text"
-                            {...register('elmKeyAdminUsername', {
-                              required: 'Administrator username is required',
-                              pattern: {
-                                value: /^[a-zA-Z0-9._-]+$/,
-                                message: 'Username can only contain letters, numbers, dots, hyphens, and underscores'
-                              }
-                            })}
-                            className="flex-1 rounded-l-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                            placeholder="username"
-                          />
-                          <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                            @state.mn.us
-                          </span>
-                        </div>
+                        <input
+                          type="email"
+                          {...register('elmKeyAdminUsername', {
+                            required: 'Administrator email is required',
+                            pattern: {
+                              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                              message: 'Please enter a valid email address'
+                            }
+                          })}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          placeholder="admin@example.com"
+                        />
                         {errors.elmKeyAdminUsername && (
                           <p className="mt-1 text-sm text-red-600">{errors.elmKeyAdminUsername.message}</p>
                         )}

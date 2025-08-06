@@ -6,7 +6,6 @@ import { supabase } from './lib/supabase';
 import { toast } from 'sonner';
 import Header from './components/Header';
 import AgencySelect from './components/AgencySelect';
-import BusinessUnitSelect from './components/BusinessUnitSelect';
 
 interface HrPayrollRoleSelection {
   // Agency / Department ID Access
@@ -15,7 +14,6 @@ interface HrPayrollRoleSelection {
   departmentId: string;
   prohibitedDepartmentIds: string;
   deleteAccessCodes: string;
-  homeBusinessUnit: string;
   
   // HR/Payroll SEMA4 Roles
   hrDataEntry: boolean;
@@ -24,29 +22,51 @@ interface HrPayrollRoleSelection {
   hrDirector: boolean;
   hrStatewide: boolean;
   
-  // Payroll Roles
-  payrollDataEntry: boolean;
-  payrollDataInquiry: boolean;
-  payrollSupervisor: boolean;
-  payrollDirector: boolean;
-  payrollStatewide: boolean;
+  // Payroll Components - Left Column
+  adjustmentsRetroPayUpdate: boolean;
+  adjustmentsRetroPayView: boolean;
+  adjustmentsRetroPayViewInquire: boolean;
+  balancesPaycheckView: boolean;
+  businessExpenseUpdate: boolean;
+  businessExpenseView: boolean;
+  businessExpenseViewInquire: boolean;
+  directDepositUpdateCorrect: boolean;
+  directDepositView: boolean;
   
-  // Benefits Administration
-  benefitsAdministrator: boolean;
-  benefitsInquiry: boolean;
+  // Payroll Components - Middle Column
+  deptTblPayrollView: boolean;
+  expenseTransfersUpdate: boolean;
+  expenseTransfersView: boolean;
+  expenseTransfersViewInquire: boolean;
+  garnishmentView: boolean;
+  laborDistributionUpdate: boolean;
+  laborDistributionView: boolean;
+  leaveUpdate: boolean;
+  leaveView: boolean;
   
-  // Position Management
-  positionControl: boolean;
-  positionInquiry: boolean;
+  // Payroll Components - Right Column
+  massTimeEntryUpdateCorrect: boolean;
+  massTimeEntryView: boolean;
+  payrollDataUpdateCorrect: boolean;
+  payrollDataView: boolean;
+  schedulesUpdate: boolean;
+  schedulesView: boolean;
+  selfServiceTimeEntryAdmin: boolean;
+  selfServiceTimeEntryView: boolean;
   
-  // Reporting
-  hrReporting: boolean;
-  payrollReporting: boolean;
+  // Benefits Administration  
+  adjustmentsBeneAdmBase: boolean;
+  adjustmentsBeneAdmAuto: boolean;
+  adjustmentsBeneBilling: boolean;
+  beneACAEligibilityUpdate: boolean;
+  mnStateCollegeBeneReports: boolean;
   
-  // Special Access
-  confidentialEmployeeAccess: boolean;
-  workersCompAccess: boolean;
-  
+  // Recruiting Solutions
+  recruitRecruiter: boolean;
+  recruitRecruiterLimited: boolean;
+  recruitAffirmativeAction: boolean;
+  recruitHiringManager: boolean;
+   
   // Justification
   roleJustification: string;
   supervisorApproval: boolean;
@@ -59,7 +79,6 @@ function HrPayrollRoleSelectionPage() {
   const [requestId, setRequestId] = useState<string | null>(null);
   const [requestDetails, setRequestDetails] = useState<any>(null);
   const [selectedAgency, setSelectedAgency] = useState({ name: '', code: '' });
-  const [selectedBusinessUnit, setSelectedBusinessUnit] = useState({ name: '', code: '' });
 
   const {
     register,
@@ -84,11 +103,6 @@ function HrPayrollRoleSelectionPage() {
   const handleAgencyChange = (agencyName: string, agencyCode: string) => {
     setSelectedAgency({ name: agencyName, code: agencyCode });
     setValue('agencyCodes', agencyCode);
-  };
-
-  const handleBusinessUnitChange = (businessUnitName: string, businessUnitCode: string) => {
-    setSelectedBusinessUnit({ name: businessUnitName, code: businessUnitCode });
-    setValue('homeBusinessUnit', businessUnitCode);
   };
 
   const hasHighRiskRoles = confidentialEmployeeAccess || hrStatewide || payrollStatewide;
@@ -165,7 +179,7 @@ function HrPayrollRoleSelectionPage() {
       // Store HR/Payroll role selections - mapping to database fields
       const hrPayrollRoleData = {
         request_id: requestId,
-        home_business_unit: selectedBusinessUnit.code?.padEnd(5, '0') || data.homeBusinessUnit || requestDetails?.agency_code?.padEnd(5, '0') || '00000',
+        home_business_unit: requestDetails?.agency_code?.padEnd(5, '0') || '00000',
         other_business_units: data.addAccessType === 'agency' ? selectedAgency.code : data.departmentId,
         
         // Map HR roles to available fields
@@ -256,14 +270,11 @@ function HrPayrollRoleSelectionPage() {
 
             <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-8">
               {/* Agency / Department ID Access */}
-              <div id="agency-access" className="space-y-6">
+              <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Agency / Department ID Access</h3>
                 
                 <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
                   <div className="flex">
-                    <div className="flex-shrink-0">
-                      <Database className="h-5 w-5 text-blue-400" />
-                    </div>
                     <div className="ml-3">
                       <h3 className="text-sm font-medium text-blue-800">
                         Add Access
@@ -294,21 +305,23 @@ function HrPayrollRoleSelectionPage() {
                     {addAccessType === 'agency' && (
                       <div className="ml-6 mt-2 space-y-3">
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                          <AgencySelect
-                            value={selectedAgency.name}
-                            onChange={handleAgencyChange}
-                            error={errors.agencyCodes?.message}
-                          />
+                          <div>
+                            <AgencySelect
+                              value={selectedAgency.name}
+                              onChange={handleAgencyChange}
+                              error={errors.agencyCodes?.message}
+                            />
+                          </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Selected Agency Code
+                              Agency Code
                             </label>
                             <input
                               type="text"
                               value={selectedAgency.code}
                               readOnly
                               className="block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                              placeholder="Auto-populated when agency is selected"
+                              placeholder="Code will appear when agency is selected"
                             />
                           </div>
                         </div>
@@ -355,18 +368,6 @@ function HrPayrollRoleSelectionPage() {
                         </div>
                       </div>
                     )}
-                  </div>
-                </div>
-
-                <div className="border-t pt-4">
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                    <BusinessUnitSelect
-                      businessUnitDescription={selectedBusinessUnit.name}
-                      businessUnitValue={selectedBusinessUnit.code}
-                      onBusinessUnitChange={handleBusinessUnitChange}
-                      error={errors.homeBusinessUnit?.message}
-                      required
-                    />
                   </div>
                 </div>
               </div>
@@ -650,230 +651,475 @@ function HrPayrollRoleSelectionPage() {
               </div>
 
               {/* Payroll Components */}
-              <div id="payroll" className="space-y-6">
-                <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                  <table className="min-w-full divide-y divide-gray-300">
-                    <thead style={{ backgroundColor: '#003865' }}>
-                      <tr>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                          Payroll Components
-                        </th>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                        </th>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      <tr className="bg-yellow-50">
-                        <td colSpan={3} className="px-4 py-3 text-sm text-gray-700">
-                          * Requires agency/dept. ID code(s)<br/>
-                          ** Only assign to users with non-managerial job codes. No agency/dept. ID codes required. User ID for this role is the employee ID number.
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-3 align-top">
-                          <div className="space-y-3">
-                            <div>
-                              <h4 className="font-bold text-sm text-gray-900">Payroll Data Entry</h4>
-                              <div className="space-y-1 mt-1">
-                                <label className="flex items-center">
-                                  <input
-                                    type="checkbox"
-                                    {...register('payrollDataEntry')}
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                  />
-                                  <span className="ml-2 text-sm text-gray-700">Entry Access</span>
-                                </label>
-                              </div>
-                            </div>
-                            <div>
-                              <h4 className="font-bold text-sm text-gray-900">Payroll Inquiry</h4>
-                              <div className="space-y-1 mt-1">
-                                <label className="flex items-center">
-                                  <input
-                                    type="checkbox"
-                                    {...register('payrollDataInquiry')}
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                  />
-                                  <span className="ml-2 text-sm text-gray-700">Inquiry Access</span>
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 align-top">
-                          <div className="space-y-3">
-                            <div>
-                              <h4 className="font-bold text-sm text-gray-900">Supervisor Access</h4>
-                              <div className="space-y-1 mt-1">
-                                <label className="flex items-center">
-                                  <input
-                                    type="checkbox"
-                                    {...register('payrollSupervisor')}
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                  />
-                                  <span className="ml-2 text-sm text-gray-700">Supervisor Level</span>
-                                </label>
-                              </div>
-                            </div>
-                            <div>
-                              <h4 className="font-bold text-sm text-gray-900">Director Access</h4>
-                              <div className="space-y-1 mt-1">
-                                <label className="flex items-center">
-                                  <input
-                                    type="checkbox"
-                                    {...register('payrollDirector')}
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                  />
-                                  <span className="ml-2 text-sm text-gray-700">Director Level</span>
-                                </label>
-                              </div>
+              <div className="space-y-6">
+              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                <table className="min-w-full divide-y divide-gray-300">
+                  <thead style={{ backgroundColor: '#003865' }}>
+                    <tr>
+                      <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                        Payroll Components
+                      </th>
+                      <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                      </th>
+                      <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    <tr className="bg-yellow-50">
+                      <td colSpan={3} className="px-4 py-3 text-sm text-gray-700">
+                        * Requires agency/dept. ID code(s)<br/>
+                        ** Only assign to users with non-managerial job codes. No agency/dept. ID codes required. User ID for this role is the employee ID number.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-3 align-top">
+                        <div className="space-y-4">
+                          <div>
+                            <h4 className="font-bold text-sm text-gray-900">Adjustments/RetroPay*</h4>
+                            <div className="space-y-1 mt-1">
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('adjustmentsRetroPayUpdate')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">Update*</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('adjustmentsRetroPayView')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">View</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('adjustmentsRetroPayViewInquire')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">View Inquire only</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('balancesPaycheckView')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">Balances/Paycheck View only</span>
+                              </label>
                             </div>
                           </div>
-                        </td>
-                        <td className="px-4 py-3 align-top">
-                          <div className="space-y-3">
-                            <div>
-                              <h4 className="font-bold text-sm text-gray-900">Statewide Access</h4>
-                              <div className="space-y-1 mt-1">
-                                <label className="flex items-center">
-                                  <input
-                                    type="checkbox"
-                                    {...register('payrollStatewide')}
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                  />
-                                  <span className="ml-2 text-sm text-gray-700">Statewide Level</span>
-                                </label>
-                              </div>
+                          <div>
+                            <h4 className="font-bold text-sm text-gray-900">Business Expense*</h4>
+                            <div className="space-y-1 mt-1">
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('businessExpenseUpdate')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">Update*</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('businessExpenseView')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">View</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('businessExpenseViewInquire')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">View Inquire only</span>
+                              </label>
                             </div>
                           </div>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Benefits Administration */}
-              <div id="benefits" className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Benefits Administration</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        {...register('benefitsAdministrator')}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Benefits Administrator</span>
-                    </label>
-                  </div>
-                  <div>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        {...register('benefitsInquiry')}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Benefits Inquiry Only</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              {/* Position Management */}
-              <div id="position" className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Position Management</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        {...register('positionControl')}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Position Control</span>
-                    </label>
-                  </div>
-                  <div>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        {...register('positionInquiry')}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Position Inquiry Only</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              {/* Reporting */}
-              <div id="reporting" className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Reporting</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        {...register('hrReporting')}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">HR Reporting</span>
-                    </label>
-                  </div>
-                  <div>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        {...register('payrollReporting')}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Payroll Reporting</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              {/* Special Access */}
-              <div id="special-access" className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Special Access</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        {...register('confidentialEmployeeAccess')}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Confidential Employee Access</span>
-                    </label>
-                    {confidentialEmployeeAccess && (
-                      <div className="mt-2 p-3 bg-yellow-50 border-l-4 border-yellow-400">
-                        <div className="flex">
-                          <AlertTriangle className="h-5 w-5 text-yellow-400" />
-                          <div className="ml-3">
-                            <p className="text-sm text-yellow-700">
-                              <strong>High Risk Role:</strong> This role provides access to confidential employee information and requires additional approval.
-                            </p>
+                          <div>
+                            <h4 className="font-bold text-sm text-gray-900">Direct Deposit*</h4>
+                            <div className="space-y-1 mt-1">
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('directDepositUpdateCorrect')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">Update/Correct*</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('directDepositView')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">View</span>
+                              </label>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        {...register('workersCompAccess')}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Workers' Compensation Access</span>
-                    </label>
-                  </div>
-                </div>
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        <div className="space-y-4">
+                          <div>
+                            <h4 className="font-bold text-sm text-gray-900">DeptTbl Payroll Access</h4>
+                            <div className="space-y-1 mt-1">
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('deptTblPayrollView')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">View only</span>
+                              </label>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-sm text-gray-900">Expense Transfers</h4>
+                            <div className="space-y-1 mt-1">
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('expenseTransfersUpdate')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">Update</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('expenseTransfersView')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">View</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('expenseTransfersViewInquire')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">View Inquire only</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('garnishmentView')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">Garnishment View only</span>
+                              </label>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-sm text-gray-900">Labor Distribution</h4>
+                            <div className="flex space-x-4 mt-1">
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('laborDistributionUpdate')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">Update</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('laborDistributionView')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">View</span>
+                              </label>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-sm text-gray-900">Leave</h4>
+                            <div className="flex space-x-4 mt-1">
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('leaveUpdate')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">Update</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('leaveView')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">View</span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        <div className="space-y-4">
+                          <div>
+                            <h4 className="font-bold text-sm text-gray-900">Mass Time Entry*</h4>
+                            <div className="space-y-1 mt-1">
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('massTimeEntryUpdateCorrect')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">Update/Correct*</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('massTimeEntryView')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">View</span>
+                              </label>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-sm text-gray-900">Payroll Data</h4>
+                            <div className="space-y-1 mt-1">
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('payrollDataUpdateCorrect')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">Update/Correct</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('payrollDataView')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">View</span>
+                              </label>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-sm text-gray-900">Schedules</h4>
+                            <div className="space-y-1 mt-1">
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('schedulesUpdate')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">Update</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('schedulesView')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">View</span>
+                              </label>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-sm text-gray-900">Self Service Time Entry</h4>
+                            <div className="space-y-1 mt-1">
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('selfServiceTimeEntryAdmin')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">Administrator (Update)</span>
+                              </label>
+                              <label className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  {...register('selfServiceTimeEntryView')}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm text-gray-700">View</span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
+            </div>
+
+			{/* Benefits Components */}
+			<div className="space-y-6">
+			  <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+				<table className="min-w-full divide-y divide-gray-300">
+				  <thead style={{ backgroundColor: '#003865' }}>
+					<tr>
+					  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+						Benefits Components
+					  </th>
+					  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+					  </th>
+					  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+					  </th>
+					</tr>
+				  </thead>
+				  <tbody className="bg-white divide-y divide-gray-200">
+					<tr className="bg-yellow-50">
+					  <td colSpan={3} className="px-4 py-3 text-sm text-gray-700">
+						* Requires agency/dept. ID code(s)<br/>
+						** Only assign to users with non-managerial job codes. No agency/dept. ID codes required. User ID for this role is the employee ID number.
+					  </td>
+					</tr>
+					<tr>
+					  <td className="px-4 py-3 align-top">
+						<div className="space-y-4">
+						  <div>
+							<h4 className="font-bold text-sm text-gray-900">All Benefits Pages</h4>
+							<div className="space-y-1 mt-1">
+							  <label className="flex items-center">
+								<input
+								  type="checkbox"
+								  {...register('adjustmentsBeneAdmBase')}
+								  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+								/>
+								<span className="ml-2 text-sm text-gray-700">Administrator Base Benefits</span>
+							  </label>
+							  <label className="flex items-center">
+								<input
+								  type="checkbox"
+								  {...register('adjustmentsBeneAdmAuto')}
+								  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+								/>
+								<span className="ml-2 text-sm text-gray-700">Administrator Automated Benefits</span>
+							  </label>
+							  <label className="flex items-center">
+								<input
+								  type="checkbox"
+								  {...register('adjustmentsBeneBilling')}
+								  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+								/>
+								<span className="ml-2 text-sm text-gray-700">Administrator Benefits Billings</span>
+							  </label>
+							</div>
+						  </div>
+						</div>
+					  </td>
+					  <td className="px-4 py-3 align-top">
+						<div className="space-y-4">
+						  <div>
+							<h4 className="font-bold text-sm text-gray-900">Benefits ACA Eligibility</h4>
+							<div className="space-y-1 mt-1">
+							  <label className="flex items-center">
+								<input
+								  type="checkbox"
+								  {...register('beneACAEligibilityUpdate')}
+								  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+								/>
+								<span className="ml-2 text-sm text-gray-700">Update/Correct</span>
+							  </label>
+							</div>
+						  </div>
+						</div>
+					  </td>
+					  <td className="px-4 py-3 align-top">
+						<div className="space-y-4">
+						  <div>
+							<h4 className="font-bold text-sm text-gray-900">MN State Universities & Colleges Only</h4>
+							<div className="space-y-1 mt-1">
+							  <label className="flex items-center">
+								<input
+								  type="checkbox"
+								  {...register('mnStateCollegeBeneReports')}
+								  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+								/>
+								<span className="ml-2 text-sm text-gray-700">Benefits Reports*</span>
+							  </label>
+							</div>
+						  </div>
+						</div>
+					  </td>
+					</tr>
+				  </tbody>
+				</table>
+			  </div>
+			</div>
+
+			{/* Recruiting Solutions */}
+			<div className="space-y-6">
+			  <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+				<table className="min-w-full divide-y divide-gray-300">
+				  <thead style={{ backgroundColor: '#003865' }}>
+					<tr>
+					  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+						Benefits Components
+					  </th>
+					  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+					  </th>
+					  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+					  </th>
+					</tr>
+				  </thead>
+				  <tbody className="bg-white divide-y divide-gray-200">
+					<tr className="bg-yellow-50">
+					  <td colSpan={3} className="px-4 py-3 text-sm text-gray-700">
+						* Requires agency/dept. ID code(s)<br/>
+						** Only assign to users with non-managerial job codes. No agency/dept. ID codes required. User ID for this role is the employee ID number.
+					  </td>
+					</tr>
+					<tr>
+					  <td className="px-4 py-3 align-top">
+						<div className="space-y-4">
+						  <div>
+							<div className="space-y-1 mt-1">
+							  <label className="flex items-center">
+								<input
+								  type="checkbox"
+								  {...register('recruitRecruiter')}
+								  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+								/>
+								<span className="ml-2 text-sm text-gray-700">Recruiter*</span>
+							  </label>
+							  <label className="flex items-center">
+								<input
+								  type="checkbox"
+								  {...register('recruitRecruiterLimited')}
+								  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+								/>
+								<span className="ml-2 text-sm text-gray-700">Recruiter-Limited*</span>
+							  </label>
+							  <label className="flex items-center">
+								<input
+								  type="checkbox"
+								  {...register('recruitAffirmativeAction')}
+								  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+								/>
+								<span className="ml-2 text-sm text-gray-700">Affirmative Action Officer*</span>
+							  </label>
+							  <label className="flex items-center">
+								<input
+								  type="checkbox"
+								  {...register('recruitHiringManager')}
+								  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+								/>
+								<span className="ml-2 text-sm text-gray-700">Hiring Manager Proxy**</span>
+							  </label>
+							</div>
+						  </div>
+						</div>
+					  </td>
+					</tr>
+				  </tbody>
+				</table>
+			  </div>
+			</div>
+
+         
 
               {/* Role Justification */}
               <div id="justification" className="space-y-6">
@@ -961,19 +1207,14 @@ function HrPayrollRoleSelectionPage() {
                 <button
                   type="submit"
                   disabled={saving || !hasSelectedRoles}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                    saving || !hasSelectedRoles
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                  }`}
                 >
-                  {saving ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      Save HR/Payroll Roles
-                    </>
-                  )}
+                  <Save className="h-4 w-4 mr-2" />
+                  {saving ? 'Saving...' : 'Submit HR/Payroll Role Request'}
                 </button>
               </div>
             </form>

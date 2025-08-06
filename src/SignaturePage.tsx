@@ -32,6 +32,7 @@ function SignaturePage() {
   const [error, setError] = useState<string | null>(null);
   const [request, setRequest] = useState<RequestDetails | null>(null);
   const [approval, setApproval] = useState<ApprovalDetails | null>(null);
+  const [comments, setComments] = useState('');
 
   useEffect(() => {
     fetchRequestDetails();
@@ -187,7 +188,8 @@ function SignaturePage() {
         .update({
           signature_data: signatureData,
           status: 'approved',
-          approved_at: new Date().toISOString()
+          approved_at: new Date().toISOString(),
+          comments: comments.trim() || null
         })
         .eq('id', approvalId);
 
@@ -259,12 +261,12 @@ function SignaturePage() {
 
               {/* Agreement Checkbox */}
               <div className="mb-6">
-                <label className="inline-flex items-center">
+                <label className="inline-flex items-start">
                   <input
                     type="checkbox"
                     checked={hasAgreed}
                     onChange={(e) => setHasAgreed(e.target.checked)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4 mt-1"
                   />
                   <span className="ml-2 text-sm text-gray-700">
                     I have read and agree to the above statement
@@ -275,6 +277,23 @@ function SignaturePage() {
                     You must agree to the terms before signing
                   </p>
                 )}
+                
+                {/* Comments Box */}
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Additional Comments (Optional)
+                  </label>
+                  <textarea
+                    value={comments}
+                    onChange={(e) => setComments(e.target.value)}
+                    rows={3}
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="Add any additional comments or notes regarding this approval..."
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    These comments will be saved with your signature for reference.
+                  </p>
+                </div>
               </div>
 
               {/* Signature Canvas */}

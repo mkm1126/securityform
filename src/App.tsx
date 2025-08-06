@@ -127,30 +127,116 @@ function App() {
   const hasSelectedSecurityArea = !!selectedSecurityArea;
 
   // Generate test data
-  const getTestData = () => ({
-    startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
-    employeeName: 'John Test User',
-    employeeId: '12345',
-    workLocation: 'Test Building, Room 123',
-    workPhone: '6515551234',
-    email: 'john.testuser@state.mn.us',
-    agencyName: 'Administration',
-    agencyCode: 'G02',
-    justification: 'This is test data for development and testing purposes.',
-    submitterName: currentUser || 'Test Submitter',
-    submitterEmail: `${(currentUser || 'testsubmitter').toLowerCase().replace(/\s+/g, '.')}@state.mn.us`,
-    supervisorName: 'Jane Test Supervisor',
-    supervisorUsername: 'jane.supervisor',
-    securityAdminName: 'Bob Test Admin',
-    securityAdminUsername: 'bob.admin',
-    accountingDirector: 'Alice Test Director',
-    accountingDirectorUsername: 'alice.director',
-    elmKeyAdmin: 'Carol Test ELM Admin',
-    elmKeyAdminUsername: 'carol.elmadmin',
-    copyUserName: 'Sample Copy User',
-    copyUserEmployeeId: '67890',
-    copyUserSema4Id: 'SAMP001'
-  });
+  const getTestData = () => {
+    const employeeName = getRandomEmployeeName();
+    const supervisorName = getRandomEmployeeName();
+    const securityAdminName = getRandomEmployeeName();
+    const accountingDirectorName = getRandomEmployeeName();
+    const elmKeyAdminName = getRandomEmployeeName();
+    const copyUserName = getRandomEmployeeName();
+    const randomAgency = getRandomAgency();
+    
+    return {
+      startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
+      employeeName: employeeName,
+      employeeId: getRandomEmployeeId(),
+      workLocation: getRandomWorkLocation(),
+      workPhone: getRandomPhone(),
+      email: getRandomEmail(employeeName),
+      agencyName: randomAgency.name,
+      agencyCode: randomAgency.code,
+      justification: 'This is test data for development and testing purposes.',
+      submitterName: currentUser || 'Test Submitter',
+      submitterEmail: `${(currentUser || 'testsubmitter').toLowerCase().replace(/\s+/g, '.')}@state.mn.us`,
+      supervisorName: supervisorName,
+      supervisorUsername: getRandomEmail(supervisorName),
+      securityAdminName: securityAdminName,
+      securityAdminUsername: getRandomEmail(securityAdminName),
+      accountingDirector: accountingDirectorName,
+      accountingDirectorUsername: getRandomEmail(accountingDirectorName),
+      elmKeyAdmin: elmKeyAdminName,
+      elmKeyAdminUsername: getRandomEmail(elmKeyAdminName),
+      copyUserName: copyUserName,
+      copyUserEmployeeId: getRandomEmployeeId(),
+      copyUserSema4Id: `SAMP${Math.floor(Math.random() * 900 + 100)}`
+    };
+  };
+
+  // Generate random employee name for testing
+  const getRandomEmployeeName = () => {
+    const firstNames = [
+      'Alex', 'Jordan', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Avery', 'Quinn',
+      'Blake', 'Cameron', 'Drew', 'Emery', 'Finley', 'Harper', 'Hayden', 'Jamie',
+      'Kendall', 'Logan', 'Parker', 'Peyton', 'Reese', 'Sage', 'Skyler', 'Tanner'
+    ];
+    
+    const lastNames = [
+      'Anderson', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis',
+      'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson',
+      'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin', 'Lee', 'Perez', 'Thompson', 'White'
+    ];
+    
+    const randomFirst = firstNames[Math.floor(Math.random() * firstNames.length)];
+    const randomLast = lastNames[Math.floor(Math.random() * lastNames.length)];
+    
+    return `${randomFirst} ${randomLast}`;
+  };
+
+  // Generate random employee ID for testing
+  const getRandomEmployeeId = () => {
+    // Generate a random 5-digit employee ID (10000-99999)
+    return Math.floor(Math.random() * 90000 + 10000).toString();
+  };
+
+  // Generate random email address for testing
+  const getRandomEmail = (name: string) => {
+    const domains = [
+      'state.mn.us', 'gmail.com', 'outlook.com', 'yahoo.com', 'company.com',
+      'agency.gov', 'department.org', 'office.net', 'business.com', 'work.org'
+    ];
+    const randomDomain = domains[Math.floor(Math.random() * domains.length)];
+    const cleanName = name.toLowerCase().replace(/\s+/g, '.');
+    return `${cleanName}@${randomDomain}`;
+  };
+
+  // Generate random phone number for testing
+  const getRandomPhone = () => {
+    const areaCodes = ['612', '651', '763', '952', '320', '507', '218', '507'];
+    const randomAreaCode = areaCodes[Math.floor(Math.random() * areaCodes.length)];
+    const exchange = Math.floor(Math.random() * 900 + 100);
+    const number = Math.floor(Math.random() * 9000 + 1000);
+    return `${randomAreaCode}${exchange}${number}`;
+  };
+
+  // Generate random agency for testing
+  const getRandomAgency = () => {
+    const testAgencies = [
+      { name: 'Administration', code: 'G02' },
+      { name: 'Agriculture', code: 'B04' },
+      { name: 'Commerce', code: 'B13' },
+      { name: 'Education', code: 'E37' },
+      { name: 'Health', code: 'H12' },
+      { name: 'Transportation', code: 'T79' },
+      { name: 'Natural Resources', code: 'R29' },
+      { name: 'Public Safety', code: 'P07' },
+      { name: 'Revenue', code: 'G67' },
+      { name: 'Human Services', code: 'H55' }
+    ];
+    return testAgencies[Math.floor(Math.random() * testAgencies.length)];
+  };
+
+  // Generate random work location for testing
+  const getRandomWorkLocation = () => {
+    const buildings = [
+      'Centennial Office Building', 'Freeman Building', 'Stassen Building',
+      'Capitol Complex', 'Andersen Building', 'Transportation Building',
+      'Health Building', 'Revenue Building', 'Agriculture Building'
+    ];
+    const rooms = ['Room 101', 'Room 205', 'Room 312', 'Suite 150', 'Suite 220', 'Office 305'];
+    const randomBuilding = buildings[Math.floor(Math.random() * buildings.length)];
+    const randomRoom = rooms[Math.floor(Math.random() * rooms.length)];
+    return `${randomBuilding}, ${randomRoom}`;
+  };
 
   // Auto-populate test data when test mode is enabled and security area is selected
   useEffect(() => {
@@ -161,7 +247,7 @@ function App() {
       // Populate basic fields
       setValue('startDate', testData.startDate);
       setValue('employeeName', testData.employeeName);
-      setValue('employeeId', testData.employeeId);
+      setValue('employeeId', getRandomEmployeeId());
       setValue('workLocation', testData.workLocation);
       setValue('workPhone', testData.workPhone);
       setValue('email', testData.email);
@@ -259,9 +345,9 @@ function App() {
         submitter_name: formData.submitterName,
         submitter_email: formData.submitterEmail,
         supervisor_name: formData.supervisorName,
-        supervisor_email: `${formData.supervisorUsername}@state.mn.us`,
+        supervisor_email: formData.supervisorUsername,
         security_admin_name: formData.securityAdminName,
-        security_admin_email: `${formData.securityAdminUsername}@state.mn.us`,
+        security_admin_email: formData.securityAdminUsername,
         poc_user: currentUser
       };
 
@@ -280,7 +366,7 @@ function App() {
           request_id: request.id,
           area_type: 'accounting_procurement',
           director_name: formData.accountingDirector,
-          director_email: `${formData.accountingDirectorUsername}@state.mn.us`,
+          director_email: formData.accountingDirectorUsername,
         });
       } else if (selectedSecurityArea === 'hr_payroll') {
         securityAreas.push({
@@ -299,7 +385,7 @@ function App() {
           request_id: request.id,
           area_type: 'elm',
           director_name: formData.elmKeyAdmin,
-          director_email: `${formData.elmKeyAdminUsername}@state.mn.us`,
+          director_email: formData.elmKeyAdminUsername,
         });
       }
 
@@ -357,9 +443,9 @@ function App() {
         submitter_name: data.submitterName,
         submitter_email: data.submitterEmail,
         supervisor_name: data.supervisorName,
-        supervisor_email: `${data.supervisorUsername}@state.mn.us`,
+        supervisor_email: data.supervisorUsername,
         security_admin_name: data.securityAdminName,
-        security_admin_email: `${data.securityAdminUsername}@state.mn.us`,
+        security_admin_email: data.securityAdminUsername,
         poc_user: currentUser // Track which POC user created this request
       };
 
@@ -381,7 +467,7 @@ function App() {
           request_id: request.id,
           area_type: 'accounting_procurement',
           director_name: data.accountingDirector,
-          director_email: `${data.accountingDirectorUsername}@state.mn.us`,
+          director_email: data.accountingDirectorUsername,
         });
       } else if (data.securityArea === 'hr_payroll') {
         securityAreas.push({
@@ -400,7 +486,7 @@ function App() {
           request_id: request.id,
           area_type: 'elm',
           director_name: data.elmKeyAdmin,
-          director_email: `${data.elmKeyAdminUsername}@state.mn.us`,
+          director_email: data.elmKeyAdminUsername,
         });
       }
 
@@ -683,23 +769,18 @@ function App() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Supervisor Username*</label>
-                  <div className="mt-1 flex rounded-md shadow-sm">
-                    <input
-                      type="text"
-                      {...register('supervisorUsername', {
-                        required: 'Supervisor username is required',
-                        pattern: {
-                          value: /^[a-zA-Z0-9._-]+$/,
-                          message: 'Username can only contain letters, numbers, dots, hyphens, and underscores'
-                        }
-                      })}
-                      className="flex-1 rounded-l-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                      placeholder="username"
-                    />
-                    <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                      @state.mn.us
-                    </span>
-                  </div>
+                  <input
+                    type="email"
+                    {...register('supervisorUsername', {
+                      required: 'Supervisor email is required',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: 'Please enter a valid email address'
+                      }
+                    })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="supervisor@example.com"
+                  />
                   {errors.supervisorUsername && (
                     <p className="mt-1 text-sm text-red-600">{errors.supervisorUsername.message}</p>
                   )}
@@ -719,23 +800,18 @@ function App() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Security Administrator Username*</label>
-                  <div className="mt-1 flex rounded-md shadow-sm">
-                    <input
-                      type="text"
-                      {...register('securityAdminUsername', {
-                        required: 'Security admin username is required',
-                        pattern: {
-                          value: /^[a-zA-Z0-9._-]+$/,
-                          message: 'Username can only contain letters, numbers, dots, hyphens, and underscores'
-                        }
-                      })}
-                      className="flex-1 rounded-l-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                      placeholder="username"
-                    />
-                    <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                      @state.mn.us
-                    </span>
-                  </div>
+                  <input
+                    type="email"
+                    {...register('securityAdminUsername', {
+                      required: 'Security admin email is required',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: 'Please enter a valid email address'
+                      }
+                    })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="admin@example.com"
+                  />
                   {errors.securityAdminUsername && (
                     <p className="mt-1 text-sm text-red-600">{errors.securityAdminUsername.message}</p>
                   )}
@@ -797,23 +873,18 @@ function App() {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Director Username*</label>
-                        <div className="mt-1 flex rounded-md shadow-sm">
-                          <input
-                            type="text"
-                            {...register('accountingDirectorUsername', {
-                              required: 'Director username is required',
-                              pattern: {
-                                value: /^[a-zA-Z0-9._-]+$/,
-                                message: 'Username can only contain letters, numbers, dots, hyphens, and underscores'
-                              }
-                            })}
-                            className="flex-1 rounded-l-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                            placeholder="username"
-                          />
-                          <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                            @state.mn.us
-                          </span>
-                        </div>
+                        <input
+                          type="email"
+                          {...register('accountingDirectorUsername', {
+                            required: 'Director email is required',
+                            pattern: {
+                              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                              message: 'Please enter a valid email address'
+                            }
+                          })}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          placeholder="director@example.com"
+                        />
                         {errors.accountingDirectorUsername && (
                           <p className="mt-1 text-sm text-red-600">{errors.accountingDirectorUsername.message}</p>
                         )}
@@ -926,23 +997,18 @@ function App() {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Administrator Username*</label>
-                        <div className="mt-1 flex rounded-md shadow-sm">
-                          <input
-                            type="text"
-                            {...register('elmKeyAdminUsername', {
-                              required: 'Administrator username is required',
-                              pattern: {
-                                value: /^[a-zA-Z0-9._-]+$/,
-                                message: 'Username can only contain letters, numbers, dots, hyphens, and underscores'
-                              }
-                            })}
-                            className="flex-1 rounded-l-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                            placeholder="username"
-                          />
-                          <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                            @state.mn.us
-                          </span>
-                        </div>
+                        <input
+                          type="email"
+                          {...register('elmKeyAdminUsername', {
+                            required: 'Administrator email is required',
+                            pattern: {
+                              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                              message: 'Please enter a valid email address'
+                            }
+                          })}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          placeholder="admin@example.com"
+                        />
                         {errors.elmKeyAdminUsername && (
                           <p className="mt-1 text-sm text-red-600">{errors.elmKeyAdminUsername.message}</p>
                         )}
